@@ -13,6 +13,7 @@ Para a inicialização do banco basta o comando
 create database new_blog;
 
 use new_blog;
+
 CREATE TABLE if not exists  post( 
                     id INT AUTO_INCREMENT PRIMARY KEY NOT NULL, 
                     nome VARCHAR(60) NOT NULL, 
