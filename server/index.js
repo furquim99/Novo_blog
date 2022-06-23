@@ -1,100 +1,126 @@
 const express = require("express");
-const helmet = require ('helmet');
-const compression = require ('compression');
 const app = express();
 const mysql = require("mysql");
 const cors = require("cors");
-require('./startup/prod')(app);
 
+app.use(cors());
+app.use(express.json());
 
 const db = mysql.createConnection({
-    
-    host: "localhost:3307", //127.0.0.1
-    user: "root",
-    password: "1999",
-    database: "new_blog",
+  user: "root",
+  host: "localhost",
+  password: "furquimjr",
+  database: "employeeSystem",
+});
 
-  });
+app.get("/employees", (req, res) => {
+    db.query("SELECT * FROM employees", (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send(result);
+      }
+    });
+});
 
-app.use(express.json());
-app.use(express.urlencoded({extended: true}));
-app.use(cors());
+app.post("/create", (req, res) => {
+  const name = req.body.name;
+  const age = req.body.age;
+  const country = req.body.country;
+  const position = req.body.position;
+  const wage = req.body.wage;
 
-app.get("/", (req, res) => {
-    res.send("hello world");
-    
-    /*let SQL = " INSERT INTO post (nome, titulo, descricao) VALUES ( 'Fabio', 'segundo post', 'meu segundo post')";
+  db.query(
+    "INSERT INTO employees (name, age, country, position, wage) VALUES (?,?,?,?,?)",
+    [name, age, country, position, wage],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send("Values Inserted");
+      }
+    }
+  );
+});
 
-    db.query(SQL, (err, result) => {
+app.put("/update", (req, res) => {
+  const id = req.body.id;
+  const wage = req.body.wage;
+  db.query(
+    "UPDATE employees SET wage = ? WHERE id = ?",
+    [wage, id],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send(result);
+      }
+    }
+  );
+});
+
+app.delete("/delete/:id", (req, res) => {
+  const id = req.params.id;
+  db.query("DELETE FROM employees WHERE id = ?", id, (err, result) => {
+    if (err) {
       console.log(err);
-    })*/
- })
-
-app.post("/register", (req, res) => {
-  console.log("cheguei aqui");
-    const { nome } = req.body;
-    const { titulo } = req.body;
-    const { descricao } = req.body;
-    console.log(nome);
-    let mysql = "INSERT INTO post ( nome, titulo, descricao) VALUES (?, ?, ?)";
-    db.query(mysql, [nome, titulo, descricao], (err, result) => {
-      if(err){
-        console.log(err);
-      }else{
-        res.send(result);
-      }
-      
-    });
-  });
-app.post("/search", (req, res) => {
-    const { nome } = req.body;
-    const { titulo } = req.body;
-    const { descricao } = req.body;
-  
-    let mysql =
-      "SELECT * from post WHERE nome = ? AND titulo = ? AND descricao = ?";
-    db.query(mysql, [nome, titulo, descricao], (err, result) => {
-      if (err) res.send(err);
+    } else {
       res.send(result);
-    });
+    }
   });
-app.get("/getCards", (req, res) => {
-    let mysql = "SELECT * FROM post";
-    db.query(mysql, (err, result) => {
-      if (err) {
-        console.log(err);
-      } else {
-        res.send(result);
-      }
-    });
-  });
-  app.put("/edit", (req, res) => {
-    const { id } = req.body;
-    const { nome } = req.body;
-    const { titulo } = req.body;
-    const { descricao } = req.body;
-    let mysql = "UPDATE post SET nome = ?, titulo = ?, descricao = ? WHERE id = ?";
-    db.query(mysql, [nome, titulo, descricao, id], (err, result) => {
-      if (err) {
-        res.send(err);
-      } else {
-        res.send(result);
-      }
-    });
-  });
-  
-  app.delete("/delete/:id", (req, res) => {
-    const { id } = req.params;
-    let mysql = "DELETE FROM post WHERE id = ?";
-    db.query(mysql, id, (err, result) => {
-      if (err) {
-        console.log(err);
-      } else {
-        res.send(result);
-      }
-    });
-  });
+});
+app.post("/register", (req, res) => {
+  const email = req.body.email;
+  const password = req.body.password;
 
-app.listen(3001, () => {
-    console.log("rodando na porta 3001");
+  db.query("SELECT * FROM usuarios WHERE email = ?", [email], (err, result) => {
+    if (err) {
+      res.send(err);
+    }
+    if (result.length == 0) {
+      bcrypt.hash(password, saltRounds, (err, hash) => {
+        db.query(
+          "INSERT INTO usuarios (email, password) VALUE (?,?)",
+          [email, hash],
+          (error, response) => {
+            if (err) {
+              res.send(err);
+            }
+
+            res.send({ msg: "Usuário cadastrado com sucesso" });
+          }
+        );
+      });
+    } else {
+      res.send({ msg: "Email já cadastrado" });
+    }
   });
+});
+
+app.post("/login", (req, res) => {
+  const email = req.body.email;
+  const password = req.body.password;
+
+  db.query("SELECT * FROM usuarios WHERE email = ?", [email], (err, result) => {
+    if (err) {
+      res.send(err);
+    }
+    if (result.length > 0) {
+      bcrypt.compare(password, result[0].password, (error, response) => {
+        if (error) {
+          res.send(error);
+        }
+        if (response) {
+          res.send({ msg: "Usuário logado" });
+        } else {
+          res.send({ msg: "Senha incorreta" });
+        }
+      });
+    } else {
+      res.send({ msg: "Usuário não registrado!" });
+    }
+  });
+});
+app.listen(3001, () => {
+    console.log("Yey, server rodando na porta 3001");
+});
