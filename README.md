@@ -1,25 +1,34 @@
+# crud-react-node-mysql
 # Novo_blog
 
 Projeto da disciplina Desenvolvimento de Sistemas WEB - 1º Sem 2022 Desenvolvimento de um blog CRUD com mysql de banco de dados
 
 para incialização do blog, é necessarios os comandos 
-git clone https://github.com/furquim99/Novo-blog 
+git clone https://github.com/furquim99/Novo_blog
+cd client
 npm install 
 npm audit fix 
 npm start
 
+cd server
+nodemon index
+
 Para a inicialização do banco basta o comando
 
-create database new_blog;
+create database employeeSystem;
 
-use new_blog;
+use employeeSystem;
 
-CREATE TABLE if not exists  post( 
-                    id INT AUTO_INCREMENT PRIMARY KEY NOT NULL, 
-                    nome VARCHAR(60) NOT NULL, 
-                    titulo TEXT NOT NULL, 
-                    descricao VARCHAR(200) NOT NULL,
-                    created TIMESTAMP DEFAULT CURRENT_TIMESTAMP);
-                    
-select * from post;
+CREATE TABLE employees(
+	id int(10) NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    name varchar(100) NOT NULL,
+    age int(10) NOT NULL,
+    country varchar(100) NOT NULL,
+    position varchar(100) NOT NULL,
+    wage varchar(500) NOT NULL
+) ENGINE=InnoDB default charset=utf8;
+
+select * from employees;
+
+
 
