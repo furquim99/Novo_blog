@@ -11,6 +11,7 @@ npm audit fix
 npm start
 
 cd server
+npm install
 nodemon index
 
 Para a inicialização do banco basta o comando
